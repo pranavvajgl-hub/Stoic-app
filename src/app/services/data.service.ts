@@ -11,6 +11,11 @@ export interface PackList {
     items: Item[];
 }
 
+export interface PackedItemInfo {
+    itemName: string;
+    listName: string; // Přidáme jméno seznamu, ať víme, odkud je
+};
+
 @Injectable({
     providedIn: 'root'
 })
@@ -110,4 +115,28 @@ export class DataService {
             list.items.push(newItem);
         }
     }
+
+    public getAllPackedItems(): PackedItemInfo[] {
+        const allPackedItems: PackedItemInfo[] = [];
+
+        // Projdeme všechny seznamy (bubliny)
+        for (const list of this.packLists) {
+
+            // V každém seznamu projdeme všechny věci
+            for (const item of list.items) {
+
+                // Pokud je věc sbalená...
+                if (item.isPacked) {
+                    // ...přidáme ji do našeho finálního seznamu
+                    allPackedItems.push({
+                        itemName: item.name,
+                        listName: list.name // A připojíme jméno seznamu!
+                    });
+                }
+            }
+        }
+
+        return allPackedItems;
+    }
+
 }
