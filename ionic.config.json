@@ -1,0 +1,7 @@
+{
+  "name": "pack-hunter",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
