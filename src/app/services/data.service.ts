@@ -97,4 +97,17 @@ export class DataService {
             }
         }
     }
+
+    public addItemToList(listId: number, itemName: string): void {
+        const list = this.getListById(listId);
+
+        if (list) {
+            const newItem: Item = {
+                name: itemName,
+                isPacked: false
+            };
+
+            list.items.push(newItem);
+        }
+    }
 }
