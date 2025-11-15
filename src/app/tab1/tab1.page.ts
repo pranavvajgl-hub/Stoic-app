@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-// Z @angular/common
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
-// Z @ionic/angular/standalone
-// PŘIDALI JSME: IonFab, IonFabButton, IonIcon, AlertController
 import { 
   IonHeader, IonToolbar, IonTitle, IonContent,
   IonCard, IonCardHeader, IonCardTitle, IonCardContent,
@@ -42,12 +40,16 @@ export class Tab1Page implements OnInit {
 
 constructor(
   private dataService: DataService,
-  private alertCtrl: AlertController
+  private alertCtrl: AlertController,
+  private router: Router
 ) {
   addIcons({ add });
 }
   ngOnInit() {
     this.packLists = this.dataService.getLists();
+  }
+  goToList(listId: number) {
+    this.router.navigateByUrl(`/list-detail/${listId}`);
   }
 
   async createNewList() {

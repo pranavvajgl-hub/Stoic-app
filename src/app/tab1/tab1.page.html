@@ -12,7 +12,8 @@
       <ion-title size="large">Moje seznamy</ion-title>
     </ion-toolbar>
   </ion-header>
-<ion-card *ngFor="let list of packLists" button="true">
+
+  <ion-card *ngFor="let list of packLists" (click)="goToList(list.id)" detail="true" button="true">
     <ion-card-header>
       <ion-card-title>
         {{ list.name }}
@@ -22,11 +23,11 @@
       Počet věcí: {{ list.items.length }}
     </ion-card-content>
   </ion-card>
-
+  
   <ion-fab slot="fixed" vertical="bottom" horizontal="end">
-  <ion-fab-button (click)="createNewList()">
-    <ion-icon name="add"></ion-icon>
-  </ion-fab-button>
-</ion-fab>
+    <ion-fab-button (click)="createNewList()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 
 </ion-content>

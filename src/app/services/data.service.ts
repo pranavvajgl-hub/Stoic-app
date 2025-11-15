@@ -53,19 +53,16 @@ export class DataService {
   }
 
   public addList(listName: string): void {
-    // Najdeme nejvyšší existující ID, aby se neopakovalo
     const maxId = this.packLists.reduce(
       (max, current) => (current.id > max ? current.id : max), 0
     );
 
-    // Vytvoříme ten nový "objekt" seznamu
     const newList: PackList = {
-      id: maxId + 1, // Dáme mu ID o jedno vyšší
+      id: maxId + 1, 
       name: listName,
-      items: [] // Začíná s prázdným seznamem věcí
+      items: [] 
     };
 
-    // Přidáme ho do naší "databáze"
     this.packLists.push(newList);
   }
 }
