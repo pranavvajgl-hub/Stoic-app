@@ -13,12 +13,18 @@
     </ion-toolbar>
   </ion-header>
 
-  <ion-card *ngFor="let list of packLists" (click)="goToList(list.id)" detail="true" button="true">
+  <ion-card 
+    *ngFor="let list of packLists" 
+    (click)="goToList(list.id)" 
+    (press)="deleteList($event, list.id)"
+    button="true">
+    
     <ion-card-header>
       <ion-card-title>
         {{ list.name }}
       </ion-card-title>
     </ion-card-header>
+    
     <ion-card-content>
       Počet věcí: {{ list.items.length }}
     </ion-card-content>

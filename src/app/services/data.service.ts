@@ -9,12 +9,13 @@ export interface Item {
 export interface PackList {
     id: number;
     name: string;
+    address?: string;
     items: Item[];
 }
 
 export interface PackedItemInfo {
     itemName: string;
-    listName: string; // Přidáme jméno seznamu, ať víme, odkud je
+    listName: string;
 
 };
 
@@ -26,6 +27,7 @@ export class DataService {
         {
             id: 1,
             name: "Vandr",
+            address: "Sněžka, 542 21 Pec pod Sněžkou",
             items: [
                 { name: "Nůž", isPacked: false, imageBase64: null },
                 { name: "Spacák", isPacked: false, imageBase64: null },
@@ -66,7 +68,7 @@ export class DataService {
         return this.packLists.find(list => list.id === id);
     }
 
-    public addList(listName: string): void {
+    public addList(listName: string, address: string): void {
         const maxId = this.packLists.reduce(
             (max, current) => (current.id > max ? current.id : max), 0
         );
@@ -74,7 +76,8 @@ export class DataService {
         const newList: PackList = {
             id: maxId + 1,
             name: listName,
-            items: []
+            address: address || '',
+            items: [],
         };
 
         this.packLists.push(newList);
@@ -150,6 +153,28 @@ export class DataService {
                 item.imageBase64 = imageBase64;
                 console.error("ulozeno");
             }
+        }
+    }
+
+    public updateList(listId: number, newName: string, newAddress: string): void {
+        // 1. Najdeme seznam podle ID
+        const list = this.getListById(listId);
+
+        if (list) {
+            // 2. Aktualizujeme jeho jméno a adresu
+            list.name = newName;
+            list.address = newAddress;
+        }
+    }
+
+    public deleteList(listId: number): void {
+        // Najdeme seznam podle ID
+        const index = this.packLists.findIndex(list => list.id === listId);
+
+        // Pokud jsme ho našli (index není -1)
+        if (index > -1) {
+            // Odstraníme 1 prvek na tomto indexu
+            this.packLists.splice(index, 1);
         }
     }
 

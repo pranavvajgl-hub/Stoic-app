@@ -61,6 +61,11 @@ export class Tab1Page implements OnInit {
           name: 'listName',
           type: 'text',
           placeholder: 'Např. Dovolená'
+        },
+        {
+          name: 'address',
+          type: 'text',
+          placeholder: 'Např. Karlštejn 18, 267 18 Karlštejn'
         }
       ],
       buttons: [
@@ -72,7 +77,8 @@ export class Tab1Page implements OnInit {
           text: 'Vytvořit',
           handler: (data) => {
             if (data.listName && data.listName.trim() !== '') {
-              this.dataService.addList(data.listName);
+              
+              this.dataService.addList(data.listName, data.address);
 
               this.packLists = this.dataService.getLists();
             }
@@ -83,5 +89,30 @@ export class Tab1Page implements OnInit {
 
     await alert.present();
   }
+
+  async deleteList(event: Event, listId: number) {
+    event.stopPropagation();
+
+    const alert = await this.alertCtrl.create({
+      header: 'Smazat seznam?',
+      message: 'Opravdu chceš tento seznam trvale smazat?',
+      buttons: [
+        {
+          text: 'Zrušit',
+          role: 'cancel'
+        },
+        {
+          text: 'Smazat',
+          handler: () => {
+            this.dataService.deleteList(listId);
+            this.packLists = this.dataService.getLists();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
 }
 

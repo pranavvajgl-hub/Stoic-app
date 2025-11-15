@@ -4,11 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { DataService, PackList, Item } from '../../services/data.service';
 import { ActivatedRoute } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { refresh, add, camera } from 'ionicons/icons';
+import { refresh, add, camera, locationOutline, createOutline } from 'ionicons/icons';
 import { AlertController } from '@ionic/angular/standalone';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { PhotoService } from '../../services/photo';
-
+import { Browser } from '@capacitor/browser';
 import {
   IonContent, IonHeader, IonTitle, IonToolbar,
   IonButtons, IonBackButton,
@@ -43,7 +43,7 @@ export class ListDetailPage implements OnInit {
     private alertCtrl: AlertController,
     private photoService: PhotoService
   ) {
-    addIcons({ refresh, camera, add });
+    addIcons({ refresh, camera, add, locationOutline, createOutline });
   }
 
   ngOnInit() {
@@ -106,8 +106,6 @@ export class ListDetailPage implements OnInit {
     console.log('START: takePicture() - Volám PhotoService...');
 
 
-    // if (!this.packList) return;
-    // const currentID = this.packList.id;
     if (!this.packList) return;
     const currentListId = this.packList.id;
 
@@ -121,4 +119,61 @@ export class ListDetailPage implements OnInit {
     }
   }
 
+  public async openLocation() {
+    if (!this.packList || !this.packList.address || this.packList.address.trim() === '') {
+      return; 
+    }
+
+    const query = encodeURIComponent(this.packList.address); 
+    const mapUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
+
+    await Browser.open({ url: mapUrl });
+  }
+
+  async editList() {
+    if (!this.packList) {
+      return; // Pojistka
+    }
+
+    const alert = await this.alertCtrl.create({
+      header: 'Upravit seznam',
+      inputs: [
+        {
+          name: 'listName',
+          type: 'text',
+          placeholder: 'Název seznamu',
+          value: this.packList.name // Předvyplníme aktuální jméno
+        },
+        {
+          name: 'address',
+          type: 'text',
+          placeholder: 'Adresa (volitelné)',
+          value: this.packList.address || '' // Předvyplníme aktuální adresu
+        }
+      ],
+      buttons: [
+        {
+          text: 'Zrušit',
+          role: 'cancel'
+        },
+        {
+          text: 'Uložit',
+          handler: (data) => {
+            if (data.listName && data.listName.trim() !== '' && this.packList) {
+              // Zavoláme naši novou metodu ze služby
+              this.dataService.updateList(this.packList.id, data.listName, data.address);
+
+              // Také rovnou aktualizujeme data na této stránce
+              this.packList.name = data.listName;
+              this.packList.address = data.address;
+            }
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
 }
+
