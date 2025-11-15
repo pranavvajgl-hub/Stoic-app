@@ -90,8 +90,10 @@ export class Tab1Page implements OnInit {
     await alert.present();
   }
 
-  async deleteList(event: Event, listId: number) {
-    event.stopPropagation();
+  async deleteList(event: any, listId: number) { 
+    if (event && event.stopPropagation) { 
+      event.stopPropagation();
+    }
 
     const alert = await this.alertCtrl.create({
       header: 'Smazat seznam?',

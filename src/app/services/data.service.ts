@@ -1,4 +1,9 @@
 import { Injectable } from '@angular/core';
+import { Preferences } from '@capacitor/preferences'; 
+import { BehaviorSubject, Observable } from 'rxjs';
+
+// --- NOVÉ KONSTANTY ---
+const STORAGE_KEY = 'packListsData'; 
 
 export interface Item {
     name: string;
@@ -16,14 +21,15 @@ export interface PackList {
 export interface PackedItemInfo {
     itemName: string;
     listName: string;
-
 };
 
 @Injectable({
     providedIn: 'root'
 })
 export class DataService {
-    private packLists: PackList[] = [
+    private packLists: PackList[] = [];
+
+    private initialSampleLists: PackList[] = [
         {
             id: 1,
             name: "Vandr",
@@ -55,16 +61,35 @@ export class DataService {
         }
     ];
 
-    constructor() { }
+    constructor() {
+        this.loadLists(); 
+    }
+    
+
+    private async loadLists() {
+        const { value } = await Preferences.get({ key: STORAGE_KEY }); 
+        
+        if (value) {
+            this.packLists = JSON.parse(value);
+        } else {
+            this.packLists = this.initialSampleLists;
+            this.saveLists(); 
+        }
+    }
+
+    private async saveLists() {
+        await Preferences.set({ 
+            key: STORAGE_KEY,
+            value: JSON.stringify(this.packLists)
+        });
+    }
+
 
     public getLists(): PackList[] {
         return this.packLists;
     }
-
+    
     public getListById(id: number): PackList | undefined {
-        // Projde pole "packLists" a vrátí ten,
-        // který má shodné ID.
-        // Pokud nic nenajde, vrátí "undefined".
         return this.packLists.find(list => list.id === id);
     }
 
@@ -81,19 +106,18 @@ export class DataService {
         };
 
         this.packLists.push(newList);
+        this.saveLists(); 
     }
 
     public toggleItemStatus(listId: number, itemName: string): void {
-        // 1. Najdeme seznam podle ID
         const list = this.getListById(listId);
 
         if (list) {
-            // 2. Najdeme věc v seznamu podle jména
             const item = list.items.find(i => i.name === itemName);
 
             if (item) {
-                // 3. Přepneme její stav (z true na false, nebo z false na true)
                 item.isPacked = !item.isPacked;
+                this.saveLists(); 
             }
         }
     }
@@ -105,6 +129,7 @@ export class DataService {
             for (const item of list.items) {
                 item.isPacked = false;
             }
+            this.saveLists(); 
         }
     }
 
@@ -119,24 +144,19 @@ export class DataService {
             };
 
             list.items.push(newItem);
+            this.saveLists(); 
         }
     }
 
     public getAllPackedItems(): PackedItemInfo[] {
         const allPackedItems: PackedItemInfo[] = [];
 
-        // Projdeme všechny seznamy (bubliny)
         for (const list of this.packLists) {
-
-            // V každém seznamu projdeme všechny věci
             for (const item of list.items) {
-
-                // Pokud je věc sbalená...
                 if (item.isPacked) {
-                    // ...přidáme ji do našeho finálního seznamu
                     allPackedItems.push({
                         itemName: item.name,
-                        listName: list.name // A připojíme jméno seznamu!
+                        listName: list.name
                     });
                 }
             }
@@ -144,38 +164,35 @@ export class DataService {
 
         return allPackedItems;
     }
+    
     public setItemImage(listId: number, itemName: string, imageBase64: string): void {
         const list = this.getListById(listId);
         if (list) {
             const item = list.items.find(i => i.name === itemName);
             if (item) {
-                // Uložíme textovou podobu obrázku
                 item.imageBase64 = imageBase64;
                 console.error("ulozeno");
+                this.saveLists(); 
             }
         }
     }
 
     public updateList(listId: number, newName: string, newAddress: string): void {
-        // 1. Najdeme seznam podle ID
         const list = this.getListById(listId);
 
         if (list) {
-            // 2. Aktualizujeme jeho jméno a adresu
             list.name = newName;
             list.address = newAddress;
+            this.saveLists();
         }
     }
 
     public deleteList(listId: number): void {
-        // Najdeme seznam podle ID
         const index = this.packLists.findIndex(list => list.id === listId);
 
-        // Pokud jsme ho našli (index není -1)
         if (index > -1) {
-            // Odstraníme 1 prvek na tomto indexu
             this.packLists.splice(index, 1);
+            this.saveLists(); 
         }
     }
-
 }
