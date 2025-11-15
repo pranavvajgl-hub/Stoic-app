@@ -1,10 +1,10 @@
 <ion-header>
   <ion-toolbar>
-    
+
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/tabs/tab1"></ion-back-button>
     </ion-buttons>
-    
+
     <ion-title>
       {{ packList ? packList.name : 'Načítám...' }}
     </ion-title>
@@ -21,14 +21,24 @@
 <ion-content class="ion-padding">
 
   <div *ngIf="packList">
-    
+
     <h3>K sbalení:</h3>
     <ion-list>
       <ng-container *ngFor="let item of packList.items">
-        <ion-item *ngIf="!item.isPacked" (click)="onItemClick(item)" button="true" detail="false">
-          <ion-label>
+        <ion-item *ngIf="!item.isPacked" lines="full">
+
+          <ion-thumbnail slot="start">
+            <img [src]="item.imageBase64" *ngIf="item.imageBase64" />
+          </ion-thumbnail>
+
+          <ion-label (click)="onItemClick(item)" class="ion-text-wrap">
             {{ item.name }}
           </ion-label>
+
+          <ion-button slot="end" fill="clear" (click)="takePicture(item)">
+            <ion-icon slot="icon-only" name="camera"></ion-icon>
+          </ion-button>
+
         </ion-item>
       </ng-container>
     </ion-list>
@@ -39,6 +49,11 @@
     <ion-list>
       <ng-container *ngFor="let item of packList.items">
         <ion-item *ngIf="item.isPacked" (click)="onItemClick(item)" button="true" detail="false" color="light">
+
+          <ion-thumbnail slot="start">
+            <img [src]="item.imageBase64" *ngIf="item.imageBase64" />
+          </ion-thumbnail>
+
           <ion-label>
             <s>{{ item.name }}</s>
           </ion-label>
@@ -51,5 +66,11 @@
   <div *ngIf="!packList">
     <p>Tento seznam se nepodařilo najít.</p>
   </div>
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button (click)="createNewItem()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 
 </ion-content>

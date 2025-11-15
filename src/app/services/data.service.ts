@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 export interface Item {
     name: string;
     isPacked: boolean;
+    imageBase64: string | null;
 }
 
 export interface PackList {
@@ -14,6 +15,7 @@ export interface PackList {
 export interface PackedItemInfo {
     itemName: string;
     listName: string; // Přidáme jméno seznamu, ať víme, odkud je
+
 };
 
 @Injectable({
@@ -25,28 +27,28 @@ export class DataService {
             id: 1,
             name: "Vandr",
             items: [
-                { name: "Nůž", isPacked: false },
-                { name: "Spacák", isPacked: false },
-                { name: "Kartáček", isPacked: false },
-                { name: "Ešus", isPacked: false }
+                { name: "Nůž", isPacked: false, imageBase64: null },
+                { name: "Spacák", isPacked: false, imageBase64: null },
+                { name: "Kartáček", isPacked: false, imageBase64: null },
+                { name: "Ešus", isPacked: false, imageBase64: null }
             ]
         },
         {
             id: 2,
             name: "Babička",
             items: [
-                { name: "Kniha", isPacked: false },
-                { name: "Mobil", isPacked: false },
-                { name: "Nabíječka", isPacked: false }
+                { name: "Kniha", isPacked: false, imageBase64: null },
+                { name: "Mobil", isPacked: false, imageBase64: null },
+                { name: "Nabíječka", isPacked: false, imageBase64: null }
             ]
         },
         {
             id: 3,
             name: "Škola",
             items: [
-                { name: "Notebook", isPacked: false },
-                { name: "Sešit", isPacked: false },
-                { name: "Pero", isPacked: false }
+                { name: "Notebook", isPacked: false, imageBase64: null },
+                { name: "Sešit", isPacked: false, imageBase64: null },
+                { name: "Pero", isPacked: false, imageBase64: null }
             ]
         }
     ];
@@ -109,7 +111,8 @@ export class DataService {
         if (list) {
             const newItem: Item = {
                 name: itemName,
-                isPacked: false
+                isPacked: false,
+                imageBase64: null
             };
 
             list.items.push(newItem);
@@ -137,6 +140,16 @@ export class DataService {
         }
 
         return allPackedItems;
+    }
+    public setItemImage(listId: number, itemName: string, imageBase64: string): void {
+        const list = this.getListById(listId);
+        if (list) {
+            const item = list.items.find(i => i.name === itemName);
+            if (item) {
+                // Uložíme textovou podobu obrázku
+                item.imageBase64 = imageBase64;
+            }
+        }
     }
 
 }
