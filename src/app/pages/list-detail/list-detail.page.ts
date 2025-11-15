@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService, PackList, Item } from '../../services/data.service';
 import { ActivatedRoute } from '@angular/router';
-import { 
-  IonContent, IonHeader, IonTitle, IonToolbar, 
+import {
+  IonContent, IonHeader, IonTitle, IonToolbar,
   IonButtons, IonBackButton,
   IonList, IonItem, IonLabel
 } from '@ionic/angular/standalone';
@@ -18,7 +18,7 @@ import {
     CommonModule, FormsModule,
     IonContent, IonHeader, IonTitle, IonToolbar,
     IonButtons, IonBackButton,
-    IonList, IonItem, IonLabel 
+    IonList, IonItem, IonLabel
   ]
 })
 export class ListDetailPage implements OnInit {
@@ -30,15 +30,22 @@ export class ListDetailPage implements OnInit {
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
-      // Získáme ':id' z naší 'app.routes.ts'
-      // Znak '+' na začátku převede text z URL na číslo (např. "1" -> 1)
-      const listId = +params.get('id')!; 
+      const listId = +params.get('id')!;
 
-      // 2. Požádáme naši službu o data pro toto konkrétní ID
       this.packList = this.dataService.getListById(listId);
-      
-      // (Pokud by listId neexistovalo, bude v 'packList' hodnota 'undefined')
+
     });
+  }
+  onItemClick(item: Item): void {
+    // Pokud list neexistuje, nic nedělej
+    if (!this.packList) {
+      return;
+    }
+
+    // Zavoláme naši službu, aby změnila stav
+    this.dataService.toggleItemStatus(this.packList.id, item.name);
+
+    // 'this.packList' o tom neví. Změna se projeví,
   }
 
 }
