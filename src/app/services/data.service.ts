@@ -52,6 +52,13 @@ export class DataService {
     return this.packLists;
   }
 
+  public getListById(id: number): PackList | undefined {
+    // Projde pole "packLists" a vrátí ten,
+    // který má shodné ID.
+    // Pokud nic nenajde, vrátí "undefined".
+    return this.packLists.find(list => list.id === id);
+  }
+
   public addList(listName: string): void {
     const maxId = this.packLists.reduce(
       (max, current) => (current.id > max ? current.id : max), 0

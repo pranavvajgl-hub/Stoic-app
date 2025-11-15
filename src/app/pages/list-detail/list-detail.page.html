@@ -3,23 +3,27 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/tabs/tab1"></ion-back-button>
     </ion-buttons>
-    <ion-title>Detail Seznamu</ion-title>
+    <ion-title>{{ packList ? packList.name : 'Načítám...' }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <p>Už brzy tady bude detail...</p>
-</ion-content>
-  <!-- <ion-header [translucent]="true">
-    <ion-toolbar>
-      <ion-title>list-detail</ion-title>
-    </ion-toolbar>
-  </ion-header>
-  
-  <ion-content [fullscreen]="true">
-    <ion-header collapse="condense">
-      <ion-toolbar>
-        <ion-title size="large">list-detail</ion-title>
-      </ion-toolbar>
-    </ion-header>
-  </ion-content> -->
+<ion-content class="ion-padding">
+
+  <div *ngIf="packList">
+    
+    <h3>Věci k sbalení:</h3>
+
+    <ion-list>
+      <ion-item *ngFor="let item of packList.items">
+        <ion-label>
+          {{ item.name }}
+        </ion-label>
+      </ion-item>
+    </ion-list>
+
+  </div>
+
+  <div *ngIf="!packList">
+    <p>Tento seznam se nepodařilo najít.</p>
+  </div></ion-content>
