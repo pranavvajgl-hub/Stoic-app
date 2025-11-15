@@ -148,6 +148,7 @@ export class DataService {
             if (item) {
                 // Uložíme textovou podobu obrázku
                 item.imageBase64 = imageBase64;
+                console.error("ulozeno");
             }
         }
     }

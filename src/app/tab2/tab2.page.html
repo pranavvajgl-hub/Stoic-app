@@ -13,6 +13,10 @@
     </ion-toolbar>
   </ion-header>
 
+  <div *ngIf="capturedImage" class="ion-padding">
+    <img [src]="capturedImage" alt="Vyfocená položka" />
+  </div>
+
   <ion-list>
 
     <ion-item *ngFor="let item of allPackedItems">
@@ -31,4 +35,11 @@
     </ion-item>
 
   </ion-list>
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button (click)="takePhoto()">
+      <ion-icon name="camera"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
 </ion-content>

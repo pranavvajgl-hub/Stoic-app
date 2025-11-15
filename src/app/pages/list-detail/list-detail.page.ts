@@ -105,12 +105,15 @@ export class ListDetailPage implements OnInit {
 
     console.log('START: takePicture() - Volám PhotoService...');
 
-    if (!this.packList) return;
-    const currentID = this.packList.id;
+
+    // if (!this.packList) return;
+    // const currentID = this.packList.id;
     if (!this.packList) return;
     const currentListId = this.packList.id;
 
     const base64String = await this.photoService.takePicture();
+
+    console.log('CONTINUE: takePicture() - Volám PhotoService...');
 
     if (base64String) {
       const finalImage = 'data:image/jpeg;base64,' + base64String;

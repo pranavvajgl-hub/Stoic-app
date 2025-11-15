@@ -18,6 +18,7 @@ export class PhotoService {
         resultType: CameraResultType.Base64, // Chceme data jako text
         source: CameraSource.Prompt // Zeptá se (Foťák / Galerie)
       });
+      console.error("vyfoceno");
 
       // Pokud máme obrázek, vrátíme ho (jako text)
       if (image.base64String) {
