@@ -1,17 +1,32 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      Tab 1
+      Moje seznamy
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" class="ion-content">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Tab 1</ion-title>
+      <ion-title size="large">Moje seznamy</ion-title>
     </ion-toolbar>
   </ion-header>
+<ion-card *ngFor="let list of packLists" button="true">
+    <ion-card-header>
+      <ion-card-title>
+        {{ list.name }}
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      Počet věcí: {{ list.items.length }}
+    </ion-card-content>
+  </ion-card>
 
-  <app-explore-container name="Tab 1 page"></app-explore-container>
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+  <ion-fab-button (click)="createNewList()">
+    <ion-icon name="add"></ion-icon>
+  </ion-fab-button>
+</ion-fab>
+
 </ion-content>
