@@ -87,4 +87,14 @@ export class DataService {
             }
         }
     }
+
+    public resetList(listId: number): void {
+        const list = this.getListById(listId);
+
+        if (list) {
+            for (const item of list.items) {
+                item.isPacked = false;
+            }
+        }
+    }
 }

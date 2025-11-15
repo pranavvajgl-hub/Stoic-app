@@ -3,10 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService, PackList, Item } from '../../services/data.service';
 import { ActivatedRoute } from '@angular/router';
+import { addIcons } from 'ionicons';
+import { refresh } from 'ionicons/icons';
 import {
   IonContent, IonHeader, IonTitle, IonToolbar,
   IonButtons, IonBackButton,
-  IonList, IonItem, IonLabel
+  IonList, IonItem, IonLabel,
+  IonButton, IonIcon
 } from '@ionic/angular/standalone';
 
 @Component({
@@ -18,15 +21,20 @@ import {
     CommonModule, FormsModule,
     IonContent, IonHeader, IonTitle, IonToolbar,
     IonButtons, IonBackButton,
-    IonList, IonItem, IonLabel
+    IonList, IonItem, IonLabel,
+    IonButton, IonIcon
   ]
 })
 export class ListDetailPage implements OnInit {
 
   public packList: PackList | undefined;
 
-  constructor(private dataService: DataService,
-    private route: ActivatedRoute) { }
+  constructor(
+    private dataService: DataService,
+    private route: ActivatedRoute
+  ) {
+    addIcons({ refresh });
+  }
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
@@ -47,5 +55,13 @@ export class ListDetailPage implements OnInit {
 
     // 'this.packList' o tom neví. Změna se projeví,
   }
+
+  onResetClick(): void {
+    if (this.packList) {
+      // Zavoláme naši službu, aby resetovala data
+      this.dataService.resetList(this.packList.id);
+    }
+  }
+
 
 }
