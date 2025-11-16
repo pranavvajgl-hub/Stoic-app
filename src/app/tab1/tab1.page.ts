@@ -1,22 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core'; // Odebrali jsme OnInit
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 import {
   IonHeader, IonToolbar, IonTitle, IonContent,
   IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-  IonFab, IonFabButton, IonIcon, AlertController
+  IonFab, IonFabButton, IonIcon, AlertController,
 } from '@ionic/angular/standalone';
+import { ViewWillEnter } from '@ionic/angular';
 
 import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
 
 import { ExploreContainerComponent } from '../explore-container/explore-container.component';
 import { DataService, PackList } from '../services/data.service';
-
-
-
-
 
 @Component({
   selector: 'app-tab1',
@@ -28,13 +25,10 @@ import { DataService, PackList } from '../services/data.service';
     IonHeader, IonToolbar, IonTitle, IonContent,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent,
     ExploreContainerComponent,
-
-    IonFab,
-    IonFabButton,
-    IonIcon
+    IonFab, IonFabButton, IonIcon,
   ],
 })
-export class Tab1Page implements OnInit {
+export class Tab1Page implements ViewWillEnter { 
 
   public packLists: PackList[] = [];
 
@@ -45,9 +39,12 @@ export class Tab1Page implements OnInit {
   ) {
     addIcons({ add });
   }
-  ngOnInit() {
-    this.packLists = this.dataService.getLists();
+
+  
+  async ionViewWillEnter() {
+    this.packLists = await this.dataService.getLists();
   }
+
   goToList(listId: number) {
     this.router.navigateByUrl(`/list-detail/${listId}`);
   }
@@ -75,12 +72,12 @@ export class Tab1Page implements OnInit {
         },
         {
           text: 'Vytvořit',
-          handler: (data) => {
+          handler: async (data) => { // ZMĚNA 5: Dáme sem 'async'
             if (data.listName && data.listName.trim() !== '') {
-              
-              this.dataService.addList(data.listName, data.address);
-
-              this.packLists = this.dataService.getLists();
+              // Tady počkáme, až se seznam uloží
+              await this.dataService.addList(data.listName, data.address);
+              // Až pak si znovu (a správně asynchronně) načteme seznam
+              this.packLists = await this.dataService.getLists();
             }
           }
         }
@@ -90,8 +87,8 @@ export class Tab1Page implements OnInit {
     await alert.present();
   }
 
-  async deleteList(event: any, listId: number) { 
-    if (event && event.stopPropagation) { 
+  async deleteList(event: any, listId: number) {
+    if (event && event.stopPropagation) {
       event.stopPropagation();
     }
 
@@ -105,9 +102,9 @@ export class Tab1Page implements OnInit {
         },
         {
           text: 'Smazat',
-          handler: () => {
-            this.dataService.deleteList(listId);
-            this.packLists = this.dataService.getLists();
+          handler: async () => { // ZMĚNA 6: Dáme sem 'async'
+            await this.dataService.deleteList(listId);
+            this.packLists = await this.dataService.getLists();
           }
         }
       ]
@@ -117,4 +114,3 @@ export class Tab1Page implements OnInit {
   }
 
 }
-

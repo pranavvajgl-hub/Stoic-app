@@ -41,10 +41,9 @@ export class Tab2Page implements ViewWillEnter {
     addIcons({ camera });
   }
 
-  ionViewWillEnter() {
-    this.allPackedItems = this.dataService.getAllPackedItems();
+  async ionViewWillEnter() {
+    this.allPackedItems = await this.dataService.getAllPackedItems();
   }
-
   /**
    * Spustí focení a uloží obrázek
    */

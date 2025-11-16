@@ -27,42 +27,28 @@ export interface PackedItemInfo {
     providedIn: 'root'
 })
 export class DataService {
+    
     private packLists: PackList[] = [];
-
+    
+    private dataLoadedPromise: Promise<void> | undefined;
+    
     private initialSampleLists: PackList[] = [
         {
             id: 1,
-            name: "Vandr",
-            address: "Sněžka, 542 21 Pec pod Sněžkou",
+            name: "Example List",
+            address: "Pražský hrad, 119 08, Hradčany, Praha 1",
             items: [
-                { name: "Nůž", isPacked: false, imageBase64: null },
-                { name: "Spacák", isPacked: false, imageBase64: null },
-                { name: "Kartáček", isPacked: false, imageBase64: null },
-                { name: "Ešus", isPacked: false, imageBase64: null }
-            ]
-        },
-        {
-            id: 2,
-            name: "Babička",
-            items: [
-                { name: "Kniha", isPacked: false, imageBase64: null },
-                { name: "Mobil", isPacked: false, imageBase64: null },
-                { name: "Nabíječka", isPacked: false, imageBase64: null }
-            ]
-        },
-        {
-            id: 3,
-            name: "Škola",
-            items: [
-                { name: "Notebook", isPacked: false, imageBase64: null },
-                { name: "Sešit", isPacked: false, imageBase64: null },
-                { name: "Pero", isPacked: false, imageBase64: null }
+                { name: "Item1", isPacked: false, imageBase64: null },
+                { name: "Item2", isPacked: false, imageBase64: null },
+                { name: "Item3", isPacked: false, imageBase64: null },
+                { name: "Item4", isPacked: false, imageBase64: null }
             ]
         }
     ];
 
     constructor() {
-        this.loadLists(); 
+        // this.loadLists(); 
+        this.dataLoadedPromise = this.loadLists();
     }
     
 
@@ -85,15 +71,19 @@ export class DataService {
     }
 
 
-    public getLists(): PackList[] {
+    public async getLists(): Promise<PackList[]> {
+        await this.dataLoadedPromise; 
         return this.packLists;
     }
     
-    public getListById(id: number): PackList | undefined {
+    public async getListById(id: number): Promise<PackList | undefined> {
+        await this.dataLoadedPromise; // Počkáme na data
         return this.packLists.find(list => list.id === id);
     }
 
-    public addList(listName: string, address: string): void {
+public async addList(listName: string, address: string): Promise<void> {
+        await this.dataLoadedPromise; // Počkáme na data
+        
         const maxId = this.packLists.reduce(
             (max, current) => (current.id > max ? current.id : max), 0
         );
@@ -106,35 +96,40 @@ export class DataService {
         };
 
         this.packLists.push(newList);
-        this.saveLists(); 
+        await this.saveLists(); // Počkáme na uložení
     }
 
-    public toggleItemStatus(listId: number, itemName: string): void {
-        const list = this.getListById(listId);
+    public async toggleItemStatus(listId: number, itemName: string): Promise<void> {
+        await this.dataLoadedPromise; // Počkáme na data
+        
+        // getListById teď vrací Promise, ale my už data máme,
+        // můžeme použít 'find' přímo na pole v paměti.
+        const list = this.packLists.find(l => l.id === listId);
 
         if (list) {
             const item = list.items.find(i => i.name === itemName);
-
             if (item) {
                 item.isPacked = !item.isPacked;
-                this.saveLists(); 
+                await this.saveLists(); // Počkáme na uložení
             }
         }
     }
 
-    public resetList(listId: number): void {
-        const list = this.getListById(listId);
+    public async resetList(listId: number): Promise<void> {
+        await this.dataLoadedPromise; // Počkáme na data
+        const list = this.packLists.find(l => l.id === listId);
 
         if (list) {
             for (const item of list.items) {
                 item.isPacked = false;
             }
-            this.saveLists(); 
+            await this.saveLists(); // Počkáme na uložení
         }
     }
 
-    public addItemToList(listId: number, itemName: string): void {
-        const list = this.getListById(listId);
+    public async addItemToList(listId: number, itemName: string): Promise<void> {
+        await this.dataLoadedPromise; // Počkáme na data
+        const list = this.packLists.find(l => l.id === listId);
 
         if (list) {
             const newItem: Item = {
@@ -142,13 +137,13 @@ export class DataService {
                 isPacked: false,
                 imageBase64: null
             };
-
             list.items.push(newItem);
-            this.saveLists(); 
+            await this.saveLists(); // Počkáme na uložení
         }
     }
 
-    public getAllPackedItems(): PackedItemInfo[] {
+    public async getAllPackedItems(): Promise<PackedItemInfo[]> {
+        await this.dataLoadedPromise; // Počkáme na data
         const allPackedItems: PackedItemInfo[] = [];
 
         for (const list of this.packLists) {
@@ -161,38 +156,41 @@ export class DataService {
                 }
             }
         }
-
         return allPackedItems;
     }
     
-    public setItemImage(listId: number, itemName: string, imageBase64: string): void {
-        const list = this.getListById(listId);
+    public async setItemImage(listId: number, itemName: string, imageBase64: string): Promise<void> {
+        await this.dataLoadedPromise; // Počkáme na data
+        const list = this.packLists.find(l => l.id === listId);
+
         if (list) {
             const item = list.items.find(i => i.name === itemName);
             if (item) {
                 item.imageBase64 = imageBase64;
-                console.error("ulozeno");
-                this.saveLists(); 
+                console.log("ulozeno"); // Upravil jsem na .log
+                await this.saveLists(); // Počkáme na uložení
             }
         }
     }
 
-    public updateList(listId: number, newName: string, newAddress: string): void {
-        const list = this.getListById(listId);
+    public async updateList(listId: number, newName: string, newAddress: string): Promise<void> {
+        await this.dataLoadedPromise; // Počkáme na data
+        const list = this.packLists.find(l => l.id === listId);
 
         if (list) {
             list.name = newName;
             list.address = newAddress;
-            this.saveLists();
+            await this.saveLists(); // Počkáme na uložení
         }
     }
 
-    public deleteList(listId: number): void {
+    public async deleteList(listId: number): Promise<void> {
+        await this.dataLoadedPromise; // Počkáme na data
         const index = this.packLists.findIndex(list => list.id === listId);
 
         if (index > -1) {
             this.packLists.splice(index, 1);
-            this.saveLists(); 
+            await this.saveLists(); // Počkáme na uložení
         }
     }
 }

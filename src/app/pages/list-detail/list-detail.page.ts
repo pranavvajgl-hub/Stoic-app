@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core'; // Odebrali jsme OnInit
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService, PackList, Item } from '../../services/data.service';
@@ -6,16 +6,16 @@ import { ActivatedRoute } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { refresh, add, camera, locationOutline, createOutline } from 'ionicons/icons';
 import { AlertController } from '@ionic/angular/standalone';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { PhotoService } from '../../services/photo';
+import { PhotoService } from '../../services/photo'; // Tvůj import je správný
 import { Browser } from '@capacitor/browser';
+
+// ZMĚNA 1: Importujeme ViewWillEnter ze správného místa
+import { ViewWillEnter } from '@ionic/angular'; 
+
 import {
   IonContent, IonHeader, IonTitle, IonToolbar,
-  IonButtons, IonBackButton,
-  IonList, IonItem, IonLabel,
-  IonButton, IonIcon,
-  IonFab, IonFabButton,
-  IonThumbnail
+  IonButtons, IonBackButton, IonList, IonItem, IonLabel,
+  IonButton, IonIcon, IonFab, IonFabButton, IonThumbnail
 } from '@ionic/angular/standalone';
 
 @Component({
@@ -24,98 +24,84 @@ import {
   styleUrls: ['./list-detail.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, FormsModule,
-    IonContent, IonHeader, IonTitle, IonToolbar,
-    IonButtons, IonBackButton,
-    IonList, IonItem, IonLabel,
-    IonButton, IonIcon,
-    IonFab,
-    IonFabButton, IonThumbnail
+    CommonModule, FormsModule, IonContent, IonHeader, IonTitle, IonToolbar,
+    IonButtons, IonBackButton, IonList, IonItem, IonLabel, IonButton,
+    IonIcon, IonFab, IonFabButton, IonThumbnail
   ]
 })
-export class ListDetailPage implements OnInit {
+export class ListDetailPage implements ViewWillEnter { // ZMĚNA 2: Používáme ViewWillEnter
 
   public packList: PackList | undefined;
+  private currentListId: number = 0; // Pomocná proměnná pro ID
 
   constructor(
     private dataService: DataService,
+    private photoService: PhotoService,
     private route: ActivatedRoute,
-    private alertCtrl: AlertController,
-    private photoService: PhotoService
+    private alertCtrl: AlertController
   ) {
-    addIcons({ refresh, camera, add, locationOutline, createOutline });
+    addIcons({ refresh, add, camera, locationOutline, createOutline });
   }
 
-  ngOnInit() {
-    this.route.paramMap.subscribe(params => {
-      const listId = params.get('id');
-      if (listId) {
-        this.packList = this.dataService.getListById(+listId);
-      }
-    });
-  }
-
-  onItemClick(item: Item): void {
-    if (this.packList) {
-      this.dataService.toggleItemStatus(this.packList.id, item.name);
+  // ZMĚNA 3: Místo ngOnInit používáme ionViewWillEnter
+  async ionViewWillEnter() {
+    // Přečteme ID z URL
+    // Použijeme snapshot, protože jsme na detailní stránce, která se vždy znovu načte
+    const listIdString = this.route.snapshot.paramMap.get('id');
+    
+    if (listIdString) {
+      this.currentListId = +listIdString;
+      
+      // ZMĚNA 4: Počkáme, až nám služba vrátí data
+      this.packList = await this.dataService.getListById(this.currentListId);
     }
   }
 
-  onResetClick(): void {
-    if (this.packList) {
-      this.dataService.resetList(this.packList.id);
-    }
+  // ZMĚNA 5: Všechny ostatní funkce musí být také 'async' a 'await'
+  
+  async onItemClick(item: Item): Promise<void> {
+    // Teď, když máme dataService asynchronní, musíme počkat na každou operaci
+    await this.dataService.toggleItemStatus(this.currentListId, item.name);
+    // A znovu načteme data, aby se změna projevila
+    this.packList = await this.dataService.getListById(this.currentListId);
   }
 
-  async createNewItem() {
-    if (!this.packList) {
-      return;
-    }
-    const currentListId = this.packList.id;
+  async onResetClick(): Promise<void> {
+    await this.dataService.resetList(this.currentListId);
+    this.packList = await this.dataService.getListById(this.currentListId);
+  }
 
+  async createNewItem(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: 'Nová položka',
       message: 'Jak se jmenuje věc, kterou chceš sbalit?',
-      inputs: [
-        {
-          name: 'itemName',
-          type: 'text',
-          placeholder: 'Např. Nůž'
-        }
-      ],
+      inputs: [{ name: 'itemName', type: 'text', placeholder: 'Např. Nůž' }],
       buttons: [
-        {
-          text: 'Zrušit',
-          role: 'cancel'
-        },
+        { text: 'Zrušit', role: 'cancel' },
         {
           text: 'Vytvořit',
-          handler: (data) => {
+          handler: async (data) => { // Handler musí být 'async'
             if (data.itemName && data.itemName.trim() !== '') {
-              this.dataService.addItemToList(currentListId, data.itemName);
+              await this.dataService.addItemToList(this.currentListId, data.itemName);
+              this.packList = await this.dataService.getListById(this.currentListId);
             }
           }
         }
       ]
     });
-
     await alert.present();
   }
-  async takePicture(item: Item) {
 
+  async takePicture(item: Item): Promise<void> {
     console.log('START: takePicture() - Volám PhotoService...');
-
-
-    if (!this.packList) return;
-    const currentListId = this.packList.id;
-
     const base64String = await this.photoService.takePicture();
-
-    console.log('CONTINUE: takePicture() - Volám PhotoService...');
+    console.log('CONTINUE: takePicture() - PhotoService odpověděl.');
 
     if (base64String) {
       const finalImage = 'data:image/jpeg;base64,' + base64String;
-      this.dataService.setItemImage(currentListId, item.name, finalImage);
+      await this.dataService.setItemImage(this.currentListId, item.name, finalImage);
+      // Znovu načteme data, aby se zobrazil obrázek
+      this.packList = await this.dataService.getListById(this.currentListId);
     }
   }
 
@@ -123,57 +109,39 @@ export class ListDetailPage implements OnInit {
     if (!this.packList || !this.packList.address || this.packList.address.trim() === '') {
       return; 
     }
-
     const query = encodeURIComponent(this.packList.address); 
     const mapUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
-
     await Browser.open({ url: mapUrl });
   }
 
   async editList() {
     if (!this.packList) {
-      return; // Pojistka
+      return;
     }
+    // Uložíme si data, protože this.packList se může uvnitř handleru chovat divně
+    const currentName = this.packList.name;
+    const currentAddress = this.packList.address || '';
 
     const alert = await this.alertCtrl.create({
       header: 'Upravit seznam',
       inputs: [
-        {
-          name: 'listName',
-          type: 'text',
-          placeholder: 'Název seznamu',
-          value: this.packList.name // Předvyplníme aktuální jméno
-        },
-        {
-          name: 'address',
-          type: 'text',
-          placeholder: 'Adresa (volitelné)',
-          value: this.packList.address || '' // Předvyplníme aktuální adresu
-        }
+        { name: 'listName', type: 'text', placeholder: 'Název seznamu', value: currentName },
+        { name: 'address', type: 'text', placeholder: 'Adresa (volitelné)', value: currentAddress }
       ],
       buttons: [
-        {
-          text: 'Zrušit',
-          role: 'cancel'
-        },
+        { text: 'Zrušit', role: 'cancel' },
         {
           text: 'Uložit',
-          handler: (data) => {
-            if (data.listName && data.listName.trim() !== '' && this.packList) {
-              // Zavoláme naši novou metodu ze služby
-              this.dataService.updateList(this.packList.id, data.listName, data.address);
-
-              // Také rovnou aktualizujeme data na této stránce
-              this.packList.name = data.listName;
-              this.packList.address = data.address;
+          handler: async (data) => { // Handler musí být 'async'
+            if (data.listName && data.listName.trim() !== '') {
+              await this.dataService.updateList(this.currentListId, data.listName, data.address);
+              // Znovu načteme data od zdroje
+              this.packList = await this.dataService.getListById(this.currentListId);
             }
           }
         }
       ]
     });
-
     await alert.present();
   }
-
 }
-
