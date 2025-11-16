@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Preferences } from '@capacitor/preferences';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs'; 
 import { BehaviorSubject, Observable } from 'rxjs';
 
 // --- NOVÉ KONSTANTY ---
@@ -46,7 +48,9 @@ export class DataService {
         }
     ];
 
-    constructor() {
+    constructor(
+        private http: HttpClient
+    ) {
         // this.loadLists(); 
         this.dataLoadedPromise = this.loadLists();
     }
@@ -225,4 +229,89 @@ export class DataService {
             }
         }
     }
+    public async getSampleApiData(): Promise<any> {
+    console.log('Volám externí API...');
+    
+    // 1. Vytvoříme "volání" (request)
+    const request = this.http.get('https://jsonplaceholder.typicode.com/todos/1');
+
+    // 2. Převedeme "Observable" na "Promise" (abychom mohli použít 'await')
+    try {
+      const data = await firstValueFrom(request);
+      console.log('API vrátilo data:', data);
+      return data;
+    } catch (error) {
+      console.error('Chyba při volání API:', error);
+      return null;
+    }
+  }
+
+  
+  private async getCoordinatesForAddress(address: string): Promise<{lat: string, lon: string} | null> {
+    console.log('Hledám souřadnice pro:', address);
+    
+    // Musíme adresu "zakódovat" pro URL
+    const encodedAddress = encodeURIComponent(address);
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodedAddress}&format=json&limit=1`;
+
+    try {
+      // Použijeme náš HttpClient
+      const request = this.http.get<any[]>(url);
+      const result = await firstValueFrom(request);
+
+      // Zkontrolujeme, jestli jsme něco našli
+      if (result && result.length > 0) {
+        const data = result[0];
+        console.log('Nalezeny souřadnice:', data.lat, data.lon);
+        return { lat: data.lat, lon: data.lon };
+      } else {
+        console.warn('Pro adresu nebyly nalezeny souřadnice:', address);
+        return null;
+      }
+    } catch (error) {
+      console.error('Chyba při geocodingu:', error);
+      return null;
+    }
+  }
+  
+  
+  public async getWeatherForAddress(address: string): Promise<number | null> {
+    
+    // Krok 1: Získáme souřadnice (tato funkce nám zůstala)
+    const coords = await this.getCoordinatesForAddress(address);
+
+    if (!coords) {
+      return null; // Adresa nebyla nalezena
+    }
+
+    // Krok 2: Voláme Open-Meteo (je zdarma a bez klíče)
+    console.log('Volám API pro počasí (Open-Meteo)...');
+    
+    // Tato URL nevyžaduje žádný API klíč!
+    // Jen chceme aktuální počasí ('current_weather=true')
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current_weather=true`;
+
+    try {
+      const request = this.http.get<any>(url);
+      const data = await firstValueFrom(request);
+
+      // Open-Meteo vrací data trochu jinak
+      if (data && data.current_weather && data.current_weather.temperature) {
+        
+        const temp = Math.round(data.current_weather.temperature); // Zaokrouhlíme
+        
+        console.log('Aktuální teplota:', temp, '°C');
+        return temp;
+        
+      } else {
+        console.warn('Open-Meteo nevrátilo data o teplotě.');
+        return null;
+      }
+    } catch (error) {
+      console.error('Chyba při volání API počasí (Open-Meteo):', error);
+      return null;
+    }
+  }
+
+
 }

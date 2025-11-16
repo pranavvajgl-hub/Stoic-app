@@ -10,7 +10,7 @@ import {
 import { ViewWillEnter } from '@ionic/angular';
 
 import { addIcons } from 'ionicons';
-import { add } from 'ionicons/icons';
+import { add, thermometerOutline } from 'ionicons/icons';
 
 import { ExploreContainerComponent } from '../explore-container/explore-container.component';
 import { DataService, PackList } from '../services/data.service';
@@ -28,21 +28,33 @@ import { DataService, PackList } from '../services/data.service';
     IonFab, IonFabButton, IonIcon,
   ],
 })
-export class Tab1Page implements ViewWillEnter { 
+export class Tab1Page implements ViewWillEnter {
 
   public packLists: PackList[] = [];
+
+  public weatherData = new Map<number, number | null>();
 
   constructor(
     private dataService: DataService,
     private alertCtrl: AlertController,
     private router: Router
   ) {
-    addIcons({ add });
+    addIcons({ add, thermometerOutline });
   }
 
-  
+
   async ionViewWillEnter() {
     this.packLists = await this.dataService.getLists();
+
+    this.weatherData.clear();
+
+    for (const list of this.packLists) {
+      if (list.address && list.address.trim() !== '') {
+
+        const temp = await this.dataService.getWeatherForAddress(list.address);
+        this.weatherData.set(list.id, temp);
+      }
+    }
   }
 
   goToList(listId: number) {

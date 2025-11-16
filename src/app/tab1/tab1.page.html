@@ -13,20 +13,26 @@
     </ion-toolbar>
   </ion-header>
 
-  <ion-card 
-    *ngFor="let list of packLists" 
-    (click)="goToList(list.id)" 
-    (press)="deleteList($event, list.id)"
+  <ion-card *ngFor="let list of packLists" (click)="goToList(list.id)" (press)="deleteList($event, list.id)"
     button="true">
-    
+
     <ion-card-header>
       <ion-card-title>
         {{ list.name }}
       </ion-card-title>
     </ion-card-header>
-    
+
     <ion-card-content>
       Počet věcí: {{ list.items.length }}
+      <div *ngIf="weatherData.has(list.id) && weatherData.get(list.id) !== null" class="weather-info">
+
+        <ion-icon name="thermometer-outline" slot="start"></ion-icon>
+
+        <span>
+          Aktuální teplota: <strong>{{ weatherData.get(list.id) }} °C</strong>
+        </span>
+
+      </div>
     </ion-card-content>
   </ion-card>
 
