@@ -5,6 +5,15 @@ Vítej u **PACKHUNTER** – tvého nepostradatelného parťáka pro **cestován�
 
 Už žádné zapomenuté nabíječky nebo zbytečně přeplněné kufry. Tato aplikace ti pomůže **vytvářet, spravovat a sdílet** balicí seznamy pro jakoukoli cestu, od víkendového útěku až po expedici na druhý konec světa. S **PACKHUNTEREM** máš jistotu, že máš s sebou vše, co potřebuješ, a cestování si tak můžeš užít bez zbytečného stresu.
 
+## 💻 Použité Technologie
+PACKHUNTER je postaven na moderních webových a mobilních technologiích.
+
+* **[Ionic Framework](https://ionicframework.com/):** Hlavní framework pro hybridní vývoj.
+* **[Angular](https://angular.io/):** Framework pro logiku a strukturu aplikace.
+* **[Capacitor](https://capacitorjs.com/):** Nástroj pro přístup k nativním funkcím (jako je Foťák 📸).
+* **[TypeScript](https://www.typescriptlang.org/):** Pro typovou bezpečnost a čistší kód.
+* **Sass (SCSS):** Pro pokročilé stylování.
+
 ## 🚀 Klíčové Vlastnosti
 * ✅ **Dynamické Balicí Seznamy:** Vytvářej seznamy na míru pro různé typy cest (dovolená, služební cesta, kempování).
 * 💡 **Návrhy Položek:** Chytré návrhy na základě délky, destinace a počasí.
@@ -18,17 +27,25 @@ Pro spuštění aplikace lokálně postupuj podle těchto kroků:
 1.  **Klonuj Repozitář:**
     ```bash
     git clone [https://github.com/pranavvajgl-hub/Stoic-app.git](https://github.com/pranavvajgl-hub/Stoic-app.git)
-    cd Stoic-app  # (Pozn.: Projekt je v repozitáři Stoic-app)
+    cd Stoic-app
     ```
-2.  **Instaluj Závislosti:** (Nahraď příkazem pro tvůj konkrétní framework/jazyk)
+2.  **Instaluj Závislosti (Node.js):**
     ```bash
-    # Příklad pro Node.js:
     npm install 
     ```
-3.  **Spusť Aplikaci:**
+3.  **Synchronizuj Nativní Pluginy (Capacitor):**
+    *Tento krok je nutný pro funkce jako je foťák.*
     ```bash
-    # Příklad:
-    npm start 
+    npx cap sync
+    ```
+4.  **Spusť Aplikaci v Prohlížeči:**
+    ```bash
+    ionic serve
+    ```
+5.  **(Alternativa) Spusť Aplikaci na Mobilu:**
+    ```bash
+    # Pro Android
+    ionic capacitor run android
     ```
 
 ## 🤝 Přispívání
