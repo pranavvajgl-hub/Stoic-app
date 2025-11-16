@@ -1,0 +1,31 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Nastavení</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Nastavení</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-list>
+    <ion-radio-group 
+        [(ngModel)]="currentTheme" 
+        (ionChange)="onThemeChange($event)">
+      
+      <ion-list-header>
+        <ion-label>Zvolte si motiv</ion-label>
+      </ion-list-header>
+
+      <ion-item *ngFor="let themeName of availableThemes">
+        <ion-label>{{ themeName | titlecase }}</ion-label>
+        <ion-radio slot="end" [value]="themeName"></ion-radio>
+      </ion-item>
+
+    </ion-radio-group>
+  </ion-list>
+
+</ion-content>

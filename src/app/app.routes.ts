@@ -12,4 +12,8 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./tabs/tabs.routes').then((m) => m.routes),
   },
+  {
+    path: 'settings',
+    loadComponent: () => import('./pages/settings/settings.page').then( m => m.SettingsPage)
+  },
 ];
