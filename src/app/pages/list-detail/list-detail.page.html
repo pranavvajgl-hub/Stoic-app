@@ -1,3 +1,29 @@
+<ion-header>
+  <ion-toolbar>
+
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/tab1"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title>
+      {{ packList ? packList.name : 'Načítám...' }}
+    </ion-title>
+
+    <ion-buttons slot="end">
+
+      <ion-button (click)="openLocation()">
+        <ion-icon name="location-outline"></ion-icon>
+      </ion-button>
+
+      <ion-button (click)="onResetClick()">
+        <ion-icon name="refresh"></ion-icon>
+      </ion-button>
+
+    </ion-buttons>
+
+  </ion-toolbar>
+</ion-header>
+
 <ion-content class="ion-padding">
 
   <div *ngIf="packList">
@@ -5,38 +31,42 @@
     <h3>K sbalení:</h3>
     <ion-list>
       <ng-container *ngFor="let item of packList.items">
-        <ion-item-sliding *ngIf="!item.isPacked">
+        <!-- <ion-item *ngIf="!item.isPacked" lines="full"> -->
 
-          <ion-item lines="full">
-            <ion-thumbnail slot="start">
-              <img [src]="item.imageBase64" *ngIf="item.imageBase64" />
-            </ion-thumbnail>
-            <ion-label (click)="onItemClick(item)" class="ion-text-wrap">
-              {{ item.name }}
-            </ion-label>
-            <ion-button slot="end" fill="clear" (click)="takePicture(item)">
-              <ion-icon slot="icon-only" name="camera"></ion-icon>
-            </ion-button>
-          </ion-item>
 
-          <ion-item-options slot="end">
-            <ion-item-option color="primary" (click)="editItem(item)">
-              <ion-icon slot="icon-only" name="create-outline"></ion-icon>
-            </ion-item-option>
-            <ion-item-option color="danger" (click)="deleteItem(item)">
-              <ion-icon slot="icon-only" name="trash"></ion-icon>
-            </ion-item-option>
-          </ion-item-options>
+          <ion-item-sliding *ngIf="!item.isPacked">
 
-        </ion-item-sliding>
+            <ion-item lines="full">
+              <ion-thumbnail slot="start">
+                <img [src]="item.imageBase64" *ngIf="item.imageBase64" />
+              </ion-thumbnail>
+              <ion-label (click)="onItemClick(item)" class="ion-text-wrap">
+                {{ item.name }}
+              </ion-label>
+              <ion-button slot="end" fill="clear" (click)="takePicture(item)">
+                <ion-icon slot="icon-only" name="camera"></ion-icon>
+              </ion-button>
+            </ion-item>
+
+            <ion-item-options slot="end">
+              <ion-item-option color="primary" (click)="editItem(item)">
+                <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+              </ion-item-option>
+              <ion-item-option color="danger" (click)="deleteItem(item)">
+                <ion-icon slot="icon-only" name="trash"></ion-icon>
+              </ion-item-option>
+            </ion-item-options>
+
+          </ion-item-sliding>
       </ng-container>
     </ion-list>
-    
+
     <hr>
 
     <h3>Sbaleno:</h3>
     <ion-list>
       <ng-container *ngFor="let item of packList.items">
+
         <ion-item-sliding *ngIf="item.isPacked">
 
           <ion-item (click)="onItemClick(item)" button="true" detail="false" color="light">
@@ -49,7 +79,7 @@
           </ion-item>
 
           <ion-item-options slot="end">
-             <ion-item-option color="primary" (click)="editItem(item)">
+            <ion-item-option color="primary" (click)="editItem(item)">
               <ion-icon slot="icon-only" name="create-outline"></ion-icon>
             </ion-item-option>
             <ion-item-option color="danger" (click)="deleteItem(item)">
@@ -70,6 +100,18 @@
   <ion-fab slot="fixed" vertical="bottom" horizontal="end">
     <ion-fab-button (click)="createNewItem()">
       <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="start">
+    <ion-fab-button (click)="editList()" color="light">
+      <ion-icon name="create-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="start">
+    <ion-fab-button (click)="editList()" color="light">
+      <ion-icon name="create-outline"></ion-icon>
     </ion-fab-button>
   </ion-fab>
 
