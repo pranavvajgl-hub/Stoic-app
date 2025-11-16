@@ -16,10 +16,12 @@ PACKHUNTER je postaven na moderních webových a mobilních technologiích.
 
 ## 🚀 Klíčové Vlastnosti
 * ✅ **Dynamické Balicí Seznamy:** Vytvářej seznamy na míru pro různé typy cest (dovolená, služební cesta, kempování).
+* 🌡️ **Aktuální Teplota:** Automaticky načte a zobrazí živé počasí pro zadanou adresu přímo na kartě seznamu.
 * 💡 **Návrhy Položek:** Chytré návrhy na základě délky, destinace a počasí.
 * 🔄 **Správa Opakovaných Položek:** Snadné ukládání a opětovné použití často balených věcí.
 * 📊 **Přehled a Progrese Balení:** Sleduj, kolik položek jsi již zabalil, a měj jasný přehled o stavu příprav.
 * ☁️ **Synchronizace a Sdílení:** Udržuj své seznamy synchronizované a sdílej je se spolucestujícími.
+
 
 ## 🛠️ Instalace a Spuštění
 Pro spuštění aplikace lokálně postupuj podle těchto kroků:
