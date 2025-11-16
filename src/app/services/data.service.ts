@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Preferences } from '@capacitor/preferences'; 
+import { Preferences } from '@capacitor/preferences';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 // --- NOVÉ KONSTANTY ---
-const STORAGE_KEY = 'packListsData'; 
+const STORAGE_KEY = 'packListsData';
 
 export interface Item {
     name: string;
@@ -27,11 +27,11 @@ export interface PackedItemInfo {
     providedIn: 'root'
 })
 export class DataService {
-    
+
     private packLists: PackList[] = [];
-    
+
     private dataLoadedPromise: Promise<void> | undefined;
-    
+
     private initialSampleLists: PackList[] = [
         {
             id: 1,
@@ -50,21 +50,21 @@ export class DataService {
         // this.loadLists(); 
         this.dataLoadedPromise = this.loadLists();
     }
-    
+
 
     private async loadLists() {
-        const { value } = await Preferences.get({ key: STORAGE_KEY }); 
-        
+        const { value } = await Preferences.get({ key: STORAGE_KEY });
+
         if (value) {
             this.packLists = JSON.parse(value);
         } else {
             this.packLists = this.initialSampleLists;
-            this.saveLists(); 
+            this.saveLists();
         }
     }
 
     private async saveLists() {
-        await Preferences.set({ 
+        await Preferences.set({
             key: STORAGE_KEY,
             value: JSON.stringify(this.packLists)
         });
@@ -72,18 +72,18 @@ export class DataService {
 
 
     public async getLists(): Promise<PackList[]> {
-        await this.dataLoadedPromise; 
+        await this.dataLoadedPromise;
         return this.packLists;
     }
-    
+
     public async getListById(id: number): Promise<PackList | undefined> {
         await this.dataLoadedPromise; // Počkáme na data
         return this.packLists.find(list => list.id === id);
     }
 
-public async addList(listName: string, address: string): Promise<void> {
+    public async addList(listName: string, address: string): Promise<void> {
         await this.dataLoadedPromise; // Počkáme na data
-        
+
         const maxId = this.packLists.reduce(
             (max, current) => (current.id > max ? current.id : max), 0
         );
@@ -101,7 +101,7 @@ public async addList(listName: string, address: string): Promise<void> {
 
     public async toggleItemStatus(listId: number, itemName: string): Promise<void> {
         await this.dataLoadedPromise; // Počkáme na data
-        
+
         // getListById teď vrací Promise, ale my už data máme,
         // můžeme použít 'find' přímo na pole v paměti.
         const list = this.packLists.find(l => l.id === listId);
@@ -158,7 +158,7 @@ public async addList(listName: string, address: string): Promise<void> {
         }
         return allPackedItems;
     }
-    
+
     public async setItemImage(listId: number, itemName: string, imageBase64: string): Promise<void> {
         await this.dataLoadedPromise; // Počkáme na data
         const list = this.packLists.find(l => l.id === listId);
@@ -191,6 +191,38 @@ public async addList(listName: string, address: string): Promise<void> {
         if (index > -1) {
             this.packLists.splice(index, 1);
             await this.saveLists(); // Počkáme na uložení
+        }
+    }
+
+    public async deleteItemFromList(listId: number, itemName: string): Promise<void> {
+        await this.dataLoadedPromise; // Počkáme na data
+        const list = this.packLists.find(l => l.id === listId);
+
+        if (list) {
+            // Najdeme index (pozici) položky v seznamu
+            const index = list.items.findIndex(item => item.name === itemName);
+
+            if (index > -1) {
+                // Pomocí splice ji "vystřihneme" pryč
+                list.items.splice(index, 1);
+                await this.saveLists(); // A uložíme změny
+            }
+        }
+    }
+
+    public async updateItemInList(listId: number, oldName: string, newName: string): Promise<void> {
+        await this.dataLoadedPromise; // Počkáme na data
+        const list = this.packLists.find(l => l.id === listId);
+
+        if (list) {
+            // Najdeme položku podle STARÉHO jména
+            const item = list.items.find(item => item.name === oldName);
+
+            if (item) {
+                // Aktualizujeme její jméno
+                item.name = newName;
+                await this.saveLists(); // A uložíme změny
+            }
         }
     }
 }

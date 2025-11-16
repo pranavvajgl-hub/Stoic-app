@@ -4,13 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { DataService, PackList, Item } from '../../services/data.service';
 import { ActivatedRoute } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { refresh, add, camera, locationOutline, createOutline } from 'ionicons/icons';
-import { AlertController } from '@ionic/angular/standalone';
+import { refresh, add, camera, locationOutline, createOutline, trash } from 'ionicons/icons';
+import { AlertController, IonItemSliding, IonItemOptions, IonItemOption } from '@ionic/angular/standalone';
 import { PhotoService } from '../../services/photo'; // Tvůj import je správný
 import { Browser } from '@capacitor/browser';
 
 // ZMĚNA 1: Importujeme ViewWillEnter ze správného místa
-import { ViewWillEnter } from '@ionic/angular'; 
+import { ViewWillEnter } from '@ionic/angular';
 
 import {
   IonContent, IonHeader, IonTitle, IonToolbar,
@@ -26,7 +26,8 @@ import {
   imports: [
     CommonModule, FormsModule, IonContent, IonHeader, IonTitle, IonToolbar,
     IonButtons, IonBackButton, IonList, IonItem, IonLabel, IonButton,
-    IonIcon, IonFab, IonFabButton, IonThumbnail
+    IonIcon, IonFab, IonFabButton, IonThumbnail,
+    IonItemSliding, IonItemOptions, IonItemOption
   ]
 })
 export class ListDetailPage implements ViewWillEnter { // ZMĚNA 2: Používáme ViewWillEnter
@@ -40,7 +41,8 @@ export class ListDetailPage implements ViewWillEnter { // ZMĚNA 2: Používáme
     private route: ActivatedRoute,
     private alertCtrl: AlertController
   ) {
-    addIcons({ refresh, add, camera, locationOutline, createOutline });
+    addIcons({ locationOutline, refresh, camera, trash, add, createOutline });
+    // addIcons({ refresh, add, camera, locationOutline, createOutline, trash });
   }
 
   // ZMĚNA 3: Místo ngOnInit používáme ionViewWillEnter
@@ -48,17 +50,17 @@ export class ListDetailPage implements ViewWillEnter { // ZMĚNA 2: Používáme
     // Přečteme ID z URL
     // Použijeme snapshot, protože jsme na detailní stránce, která se vždy znovu načte
     const listIdString = this.route.snapshot.paramMap.get('id');
-    
+
     if (listIdString) {
       this.currentListId = +listIdString;
-      
+
       // ZMĚNA 4: Počkáme, až nám služba vrátí data
       this.packList = await this.dataService.getListById(this.currentListId);
     }
   }
 
   // ZMĚNA 5: Všechny ostatní funkce musí být také 'async' a 'await'
-  
+
   async onItemClick(item: Item): Promise<void> {
     // Teď, když máme dataService asynchronní, musíme počkat na každou operaci
     await this.dataService.toggleItemStatus(this.currentListId, item.name);
@@ -107,9 +109,9 @@ export class ListDetailPage implements ViewWillEnter { // ZMĚNA 2: Používáme
 
   public async openLocation() {
     if (!this.packList || !this.packList.address || this.packList.address.trim() === '') {
-      return; 
+      return;
     }
-    const query = encodeURIComponent(this.packList.address); 
+    const query = encodeURIComponent(this.packList.address);
     const mapUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
     await Browser.open({ url: mapUrl });
   }
@@ -142,6 +144,65 @@ export class ListDetailPage implements ViewWillEnter { // ZMĚNA 2: Používáme
         }
       ]
     });
+    await alert.present();
+  }
+
+  async deleteItem(itemToDelete: Item) {
+    // Zobrazíme potvrzovací okno
+    const alert = await this.alertCtrl.create({
+      header: 'Smazat položku?',
+      message: `Opravdu chceš trvale smazat "${itemToDelete.name}"?`,
+      buttons: [
+        {
+          text: 'Zrušit',
+          role: 'cancel'
+        },
+        {
+          text: 'Smazat',
+          handler: async () => {
+            // Zavoláme službu, aby položku smazala
+            await this.dataService.deleteItemFromList(this.currentListId, itemToDelete.name);
+            // A znovu načteme data, aby položka zmizela
+            this.packList = await this.dataService.getListById(this.currentListId);
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  async editItem(itemToEdit: Item) {
+    // Vytvoříme okno, které vypadá jako "Nová položka"
+    const alert = await this.alertCtrl.create({
+      header: 'Upravit položku',
+      inputs: [
+        {
+          name: 'itemName',
+          type: 'text',
+          placeholder: 'Nové jméno',
+          value: itemToEdit.name // Předvyplníme staré jméno
+        }
+      ],
+      buttons: [
+        {
+          text: 'Zrušit',
+          role: 'cancel'
+        },
+        {
+          text: 'Uložit',
+          handler: async (data) => {
+            if (data.itemName && data.itemName.trim() !== '') {
+              // Zavoláme službu, aby položku přejmenovala
+              await this.dataService.updateItemInList(this.currentListId, itemToEdit.name, data.itemName);
+              // A znovu načteme data, aby se změna projevila
+              this.packList = await this.dataService.getListById(this.currentListId);
+            }
+          }
+        }
+      ]
+    });
+
     await alert.present();
   }
 }
